@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2020-08-19T13:14:27Z",
+        "GenerationSoftware": {
+            "Application": "EAGLE",
+            "Vendor": "Autodesk",
+            "Version": "9.5.2"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.57,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "esp32_cam"
+        },
+        "Owner": "Niko Rodriguez <niko9797@hotmail.com>",
+        "Size": {
+            "X": 66.5,
+            "Y": 29.5
+        }
+    }
+}

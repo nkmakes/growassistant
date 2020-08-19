@@ -1,0 +1,129 @@
+esphome:
+  name: esp32_led
+  platform: ESP32
+  board: esp32cam
+
+wifi:
+  ssid: "yourSSID"
+  password: "yourPASSWD"
+  fast_connect: True
+  #power_save_mode: none
+  manual_ip:
+    # Set this to the IP of the ESP
+    static_ip: 192.168.1.40
+    # Set this to the IP address of the router. Often ends with .1
+    gateway: 192.168.1.1
+    # The subnet of the network. 255.255.255.0 works for most home networks.
+    subnet: 255.255.255.0
+
+
+#captive_portal:
+web_server:
+  port: 80
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "yourAPIpasswd"
+  reboot_timeout: 5min
+
+ota:
+  password: "yourOTApasswd"
+
+# ESP32-CAM
+esp32_camera:
+  external_clock:
+    pin: GPIO0
+    frequency: 20MHz
+  i2c_pins:
+    sda: GPIO26
+    scl: GPIO27
+  data_pins: [GPIO5, GPIO18, GPIO19, GPIO21, GPIO36, GPIO39, GPIO34, GPIO35]
+  vsync_pin: GPIO25
+  href_pin: GPIO23
+  pixel_clock_pin: GPIO22
+  power_down_pin: GPIO32
+
+  # Image settings
+  name: esp32_cam
+  resolution: 640x480
+  jpeg_quality: 10
+  #max_framerate: 0.5 fps
+  #idle_framerate: 0.05 fps
+
+# Luz
+output:
+  - platform: ledc
+    channel: 5
+    pin: GPIO4
+    id: gpio_4
+  - platform: ledc
+    channel: 4
+    pin: GPIO13
+    id: gpio_13
+    
+light:
+  - platform: monochromatic
+    output: gpio_13
+    name: "LDD700L"
+    id: ldd
+  - platform: monochromatic
+    output: gpio_4
+    name: "plant flash"
+    id: plant_flash
+    
+sensor:
+  - platform: dht
+    model: DHT22
+    pin: GPIO2
+    temperature:
+      name: "Plant Temperature"
+      id: plant_temp
+    humidity:
+      name: "Plant Humidity"
+      id: plant_hum
+    update_interval: 60s
+    
+font:
+  - file: 'slkscr.ttf'
+    id: font1
+    size: 8
+
+  - file: 'BebasNeue-Regular.ttf'
+    id: font2
+    size: 48
+
+  - file: 'arial.ttf'
+    id: font3
+    size: 14
+    
+time:
+  - platform: homeassistant
+    id: esptime
+    
+i2c:
+  sda: GPIO15
+  scl: GPIO14
+  scan: False
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    rotation: 180
+    lambda: |-
+      // Print "Grass" in top center.
+      it.printf(64, 0, id(font1), TextAlign::TOP_CENTER, "Grow Assistant");
+      // Print time in HH:MM format
+      it.strftime(0, 60, id(font2), TextAlign::BASELINE_LEFT, "%H:%M", id(esptime).now());
+
+      // Print inside temperature (from homeassistant sensor)
+      if (id(plant_temp).has_state()) {
+        it.printf(127, 23, id(font3), TextAlign::TOP_RIGHT , "%.1f °", id(plant_temp).state);
+      }
+
+      // Print outside temperature (from homeassistant sensor)
+      if (id(plant_hum).has_state()) {
+        it.printf(127, 60, id(font3), TextAlign::BASELINE_RIGHT , "%.1f %%", id(plant_hum).state);
+      }
